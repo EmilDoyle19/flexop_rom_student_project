@@ -1,8 +1,10 @@
 import os
-import aircraft
 import numpy as np
 import sharpy.utils.algebra as algebra
 from helper_functions.get_settings import get_settings
+import sys
+sys.path.insert(0, '/home/emd19/FLEXOP/flexop_rom_student_project/lib/flexop_model')
+import aircraft
 
 cases_route = '../../01_case_files/'
 output_route = './output/'
