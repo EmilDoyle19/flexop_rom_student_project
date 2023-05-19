@@ -44,7 +44,7 @@ def get_settings(flexop_model, flow, dt, **kwargs):
                                                                             0.]))}
 
 
-    settings['AeroForcesCalculator'] = {'coefficients': False}
+    settings['AeroForcesCalculator'] = {'coefficients': False,}
 
     settings['NonLinearStatic'] = {'print_info': 'off',
                                 'max_iterations': 150,
@@ -163,7 +163,6 @@ def get_settings(flexop_model, flow, dt, **kwargs):
                             'save_struct': True,}
     if 'LinearAssembler' in flow:
         settings['SaveData']['save_linear'] = True
-        settings['SaveData']['save_rom'] = True
         settings['SaveData']['save_linear_uvlm'] = True
         unsteady_force_distribution = False
     else:
@@ -210,7 +209,7 @@ def get_settings(flexop_model, flow, dt, **kwargs):
                         'print_matrices': 'on',
                         'continuous_eigenvalues': 'off',
                         'dt': dt,
-                        'plot_eigenvalues': False,
+                        'plot_eigenvalues': True,
                         #  'rigid_modes_cg': True,
                         }
     if 'LinearAssembler' in flow:
@@ -237,15 +236,16 @@ def get_settings(flexop_model, flow, dt, **kwargs):
                                                             'use_sparse': 'off',
                                                             'remove_inputs': ['u_gust'],
                                                             'gust_assembler':  'LeadingEdge', #'leading_edge',
-                                                            # 'ScalingDict': {'length':flexop_model.aero.chord_main_root/2, 'speed': u_inf, 'density': rho},
+                                                            'ScalingDict': {'length':flexop_model.aero.chord_main_root/2, 'speed': u_inf, 'density': rho},
                                                             },
                                         'track_body': free_flight,
                                         'use_euler': free_flight,
                                         }}
         rom_settings = kwargs.get('rom_settings', {'use': False})
         if rom_settings['use']:
-            settings['LinearAssembler']['aero_settings']['rom_method'] = [rom_settings['rom_method']],
-            settings['LinearAssembler']['aero_settings']['rom_method_settings'] = rom_settings['rom_method_settings']
+            settings['SaveData']['save_rom'] = True
+            settings['LinearAssembler']['linear_system_settings']['aero_settings']['rom_method'] = rom_settings['rom_method'],
+            settings['LinearAssembler']['linear_system_settings']['aero_settings']['rom_method_settings'] = rom_settings['rom_method_settings']
 
     if not free_flight:
         settings['Modal']['rigid_body_modes'] = False
@@ -254,18 +254,30 @@ def get_settings(flexop_model, flow, dt, **kwargs):
                                         'frequency_cutoff': 0,
                                         'export_eigenvalues': 'on',
                                         'modes_to_plot': num_modes,
-                                        'velocity_analysis': [20, 80, 13]
+                                        'display_root_locus': 'on',
+                                        'velocity_analysis': [10, 100, 100] #minimum, maximum, number of evaluations
                                         }
 
     settings['LiftDistribution'] = {'rho': rho}
 
-    settings['BeamPlot'] = {}
+    settings['BeamPlot'] = {'include_rbm': 'on',
+                            'include_applied_forces': 'on',
+                            'include_FoR': 'on'}
 
     settings['AerogridPlot'] = {'include_rbm': 'off',
                                 'include_applied_forces': 'on',
                                 'minus_m_star': 0,
                                 'u_inf': u_inf,
                                 }
+    
+    settings['SaveParametricCase'] = {'save_pmor_items': 'on',
+                                      'save_case': 'on'}
+    settings['SaveParametricCase']['parameters'] = {'altitude': 800}
+
+    settings['PickleData'] = {}
+
+#     settings['FrequencyResponse'] = {'quick_plot': 'on'}
+    
 
     return settings
 
